@@ -19,7 +19,7 @@ const randomPosition = (size,max) => {
 }
 const randomColor = () => {
   const cores = [Colors.Yellow,Colors.Red,Colors.Green,Colors.Blue,Colors.Pink,Colors.LightBlue];
-  return cores[randomNumber(0,cores.length - 1)]
+  return cores[randomNumber(0,cores.length)]
 }
 class game_snake{
   constructor(){
