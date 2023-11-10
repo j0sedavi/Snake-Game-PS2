@@ -1,5 +1,6 @@
 //Snake Game PlayStation 2
 var canva = Screen.getMode();
+var font = new Font()
 var Colors = {
   White: Color.new(255,255,255),
   Black: Color.new(0,0,0),
@@ -10,23 +11,23 @@ var Colors = {
   Pink: Color.new(255,0,255),
   LightBlue: Color.new(0,255,255)
 }
-var delay = 70;
-const randomNumber = (min,max) => { return Math.round(Math.random() * (max - min) + min)}
-const randomPosition = (size) => {
-  const numb = randomNumber(0,canva.width - this.size)
+var delay = 15;
+const randomNumber = (min,max) => { return Math.round(Math.random() * (max - min) + min) }
+const randomPosition = (size,max) => {
+  const numb = randomNumber(0,max - size)
   return Math.round(numb/size) * size
 }
 const randomColor = () => {
   const cores = [Colors.Yellow,Colors.Red,Colors.Green,Colors.Blue,Colors.Pink,Colors.LightBlue];
-  return cores[randomNumber(0,cores.length)]
+  return cores[randomNumber(0,cores.length - 1)]
 }
 class game_snake{
   constructor(){
     this.size = 32;
     this.direction = "right"
     this.pad = Pads.get();
-    this.snake = [{x:297,y:201},{x:342,y:201}];
-    this.food = {x:randomPosition(this.size),y:randomPosition(this.size),color:randomColor()};
+    this.snake = [{x:160,y:160},{x:192,y:192}];
+    this.food = {x:randomPosition(this.size,640),y:randomPosition(this.size,448),color:randomColor()};
   }
   game() {
   this.pad.update();
@@ -53,6 +54,16 @@ class game_snake{
   }
   moveSnake() {
   let head = this.snake[this.snake.length - 1];
+  this.snake.shift();
+  if(this.pad.pressed(Pads.UP) && this.direction !== "down") {
+    this.direction = "up"
+  } else if(this.pad.pressed(Pads.DOWN) && this.direction !== "up") {
+    this.direction = "down"
+  } else if(this.pad.pressed(Pads.LEFT) && this.direction !== "right") {
+    this.direction = "left"
+  } else if(this.pad.pressed(Pads.RIGHT) && this.direction !== "left") {
+    this.direction = "right"
+  }
   switch (this.direction) {
     case "right":
       this.snake.push({x:head.x+this.size,y:head.y})
@@ -67,35 +78,25 @@ class game_snake{
       this.snake.push({x:head.x,y:head.y+this.size})
       break;
   }
-  this.snake.shift();
-  if(this.pad.pressed(Pads.UP) && this.direction !== "down") {
-    this.direction = "up"
-  }
-  if(this.pad.pressed(Pads.DOWN) && this.direction !== "up") {
-    this.direction = "down"
-  }
-  if(this.pad.pressed(Pads.LEFT) && this.direction !== "right") {
-    this.direction = "left"
-  }
-  if(this.pad.pressed(Pads.RIGHT) && this.direction !== "left") {
-    this.direction = "right"
-  }
   }
   drawFood() {
-    Draw.rect(this.food.x, this.food.y, this.food.size, this.size, food.color);
+    font.print(0,0,`X: ${this.food.x},Y: ${this.food.y}  `)
+    Draw.rect(this.food.x, this.food.y, this.size, this.size, this.food.color);
   }
   checkCollision() {
     let head = this.snake[this.snake.length - 1];
     let neckSnake = this.snake.length - 2;
     if(head.x == this.food.x && head.y == this.food.y) {
       this.snake.push(head)
-      let x = randomPosition(this.size)
-      let y = randomPosition(this.size)
-      while(this.snake.find((position) => position.x == x && position.y == y)) {
-        x = randomPosition(this.size)
-        y = randomPosition(this.size)
-      }
-        this.food = {x:x,y:y,color:randomColor()};
+      let x_t = randomPosition(this.size,640)
+      let y_t = randomPosition(this.size,448)
+      while (this.snake.find((position) => position.x == x_t && position.y == y_t)) {
+            x_t = randomPosition(this.size,640)
+            y_t = randomPosition(this.size,448)
+        }
+        this.food.x = x_t;
+        this.food.y = y_t;
+        this.food.color = randomColor();
     }
     const wall_collision = head.y < 0 || head.y  > 416 || head.x < 0 || head.x > 608;
     const self_collision = this.snake.find((position,index) => {
@@ -106,13 +107,13 @@ class game_snake{
     }
   }
   gameOver() {
-    this.direction = undefined;
-    this.snake = [{x:225,y:225}];
-    this.food = {x:randomPosition(this.size),y:randomPosition(this.size),color:randomColor()};
+    this.direction = "right";
+    this.food = {x:randomPosition(this.size,640),y:randomPosition(this.size,448),color:randomColor()};
+    this.snake = [{x:160,y:160},{x:192,y:192}];
   }
 }
 const main = new game_snake();
-var loop = () => {main.game()}
+var loop = () => { main.game() }
 Screen.displayFunc(loop);
 os.setInterval(() => {
  Screen.display(); 
